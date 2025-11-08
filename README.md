@@ -33,6 +33,12 @@ project_template/
 ## usage
 ```
 git clone project_template.git
+
+After creating a new repo from this template:
+git clone <your-new-repo>
+cd <repo>
+./setup.sh
+
 ```
 
 ## Roadmap
