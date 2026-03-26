@@ -4,6 +4,9 @@
 [submodule "terraform"]
 	path = terraform
 	url = https://github.com/mto79/project_terraform_template.git
-[submodule "kubernetes"]
-	path = kubernetes
-	url = https://github.com/mto79/project_kubernetes_template.git
+[submodule "helm"]
+	path = helm
+	url = https://github.com/mto79/project_helm_template.git
+[submodule "gitops"]
+	path = gitops
+	url = https://github.com/mto79/project_gitops_template.git
