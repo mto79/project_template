@@ -103,12 +103,15 @@ for submodule in "${!SUBMODULE_TEMPLATES[@]}"; do
     # --allow-unrelated-histories is a one-time reconciliation for repos that
     # diverged before this script was fixed; once merged they share ancestry
     # and this flag becomes a no-op on all future runs.
+    # -X theirs ensures template content always wins on conflict so the project
+    # repo stays in sync without needing manual resolution.
     git merge template/main \
       --allow-unrelated-histories \
+      -X theirs \
       -m "Merge template updates into $NEW_REPO_NAME" \
-      || echo "⚠ Merge conflicts in $NEW_REPO_NAME — resolve manually"
+      || echo "⚠ Merge failed in $NEW_REPO_NAME — resolve manually"
 
-    git push origin main
+    git push origin main --force
   fi
   cd -
 
@@ -117,13 +120,9 @@ for submodule in "${!SUBMODULE_TEMPLATES[@]}"; do
     git submodule add "$ORIGIN_URL" "$submodule"
   fi
 
-  # Sync content into the submodule working dir and push
-  rsync -a --exclude '.git/' "$CLONE_DIR"/ "$submodule"/
-  cd "$submodule"
-  git add .
-  git commit -m "Sync content from $NEW_REPO_NAME" || echo "No changes to commit"
-  git push origin main --force
-  cd -
+  # Advance the submodule pointer to the latest commit just pushed to CLONE_DIR.
+  # No rsync needed — the content is already on the remote via CLONE_DIR.
+  git submodule update --remote "$submodule"
 done
 
 # ---------------------------
@@ -154,8 +153,8 @@ fi
 # ---------------------------
 # Finalize main project
 # ---------------------------
-git submodule update --init --recursive
 git add .gitmodules
+git add $(git submodule foreach --quiet 'echo $displaypath') 2>/dev/null || git add -u
 git commit -m "Sync submodules for $MAIN_PROJECT_NAME" || echo "No changes to commit"
 git push origin main
 
